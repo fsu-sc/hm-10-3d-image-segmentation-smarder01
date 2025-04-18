@@ -32,36 +32,59 @@ class HeartMRIDataset(Dataset):
         return len(self.image_paths)
     
     def __getitem__(self, idx):
+        # Load NIfTI image and label
         img_sitk = sitk.ReadImage(self.image_paths[idx])
         lbl_sitk = sitk.ReadImage(self.label_paths[idx])
 
         img_np = sitk.GetArrayFromImage(img_sitk).astype(np.float32)
         lbl_np = sitk.GetArrayFromImage(lbl_sitk).astype(np.float32)
 
-        # Normalize image
+        # Normalize image to [0, 1]
         img_np = (img_np - img_np.min()) / (img_np.max() - img_np.min() + 1e-8)
 
-        # Convert to torch tensors and add channel dimension
+        # Define crop size
+        crop_d, crop_h, crop_w = (64, 128, 128)  # You can adjust these if needed
+        D, H, W = img_np.shape
+
+        # If the volume is smaller than crop size, raise an error
+        if D < crop_d or H < crop_h or W < crop_w:
+            raise ValueError(f"Volume too small for crop size: got ({D}, {H}, {W}), need at least ({crop_d}, {crop_h}, {crop_w})")
+
+        # Random crop (you could use center crop instead if you prefer)
+        start_d = np.random.randint(0, D - crop_d + 1)
+        start_h = np.random.randint(0, H - crop_h + 1)
+        start_w = np.random.randint(0, W - crop_w + 1)
+
+        # Apply the same crop to both image and label
+        img_np = img_np[start_d:start_d + crop_d, start_h:start_h + crop_h, start_w:start_w + crop_w]
+        lbl_np = lbl_np[start_d:start_d + crop_d, start_h:start_h + crop_h, start_w:start_w + crop_w]
+
+        # Convert to torch tensors and add channel dimension: [C, D, H, W]
         img_tensor = torch.from_numpy(img_np).unsqueeze(0)
         lbl_tensor = torch.from_numpy(lbl_np).unsqueeze(0)
 
-        return img_tensor, lbl_tensor, img_sitk, lbl_sitk
+        return img_tensor, lbl_tensor
     
 # load dataset and print stats
 dataset = HeartMRIDataset(mode = "train")
 print(f"Number of training images: {len(dataset)}")
 
-# sample metadata from first image
-_, _, img_sitk, _ = dataset[0]
+# Manually load first image with SimpleITK for spacing info
+import SimpleITK as sitk
+import os
+
+first_image_path = dataset.image_paths[0]
+img_sitk = sitk.ReadImage(first_image_path)
+
 spacing = img_sitk.GetSpacing()
 size = img_sitk.GetSize()
 
-print(f"Image Dimensions (W, H, D): {size}")
+print(f"Image dimensions (W, H, D): {size}")
 print(f"Voxel spacing (x, y, z): {spacing}")
 
 # visualize sample slices
 def visualize_sample(dataset, index=0):
-    img_tensor, lbl_tensor, _, _ = dataset[index]
+    img_tensor, lbl_tensor = dataset[index]
     img = img_tensor.squeeze(0).numpy()
     lbl = lbl_tensor.squeeze(0).numpy()
 
@@ -102,7 +125,7 @@ visualize_sample(dataset, index=0)
 def volume_distribution(dataset):
     volumes = []
     for i in range(len(dataset)):
-        _, lbl_tensor, _, _ = dataset[i]
+        _, lbl_tensor = dataset[i]
         volumes.append(torch.sum(lbl_tensor > 0).item())
 
     plt.figure(figsize=(8, 5))

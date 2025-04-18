@@ -23,7 +23,7 @@ val_dataset = HeartMRIDataset(mode = "val")
 
 def visualize_prediction(index=0):
     with torch.no_grad():
-        image, mask, _, _ = val_dataset[index]
+        image, mask = val_dataset[index]
         image = image.unsqueeze(0).to(device, dtype=torch.float32)  # [1, 1, D, H, W]
         mask = mask.squeeze().cpu().numpy()
 

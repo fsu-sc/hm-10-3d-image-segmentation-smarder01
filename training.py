@@ -41,13 +41,17 @@ def train_model(epochs=50, batch_size=2, learning_rate=1e-4, log_dir="runs/heart
     writer = SummaryWriter(log_dir = log_dir)
     os.makedirs(checkpoint_dir, exist_ok = True)
 
+    # Save model architecture to TensorBoard using one batch
+    sample_input = next(iter(train_loader))[0].to(device)
+    writer.add_graph(model, sample_input)
+
     best_val_loss = float("inf")
 
     for epoch in range(epochs):
         model.train()
         total_train_loss = 0
 
-        for images, masks, _, _ in train_loader:
+        for images, masks in train_loader:
             images = images.to(device, dtype=torch.float32)
             masks = masks.to(device, dtype=torch.float32)
 
@@ -67,7 +71,7 @@ def train_model(epochs=50, batch_size=2, learning_rate=1e-4, log_dir="runs/heart
         model.eval()
         total_val_loss = 0
         with torch.no_grad():
-            for images, masks, _, _ in val_loader:
+            for images, masks in val_loader:
                 images = images.to(device, dtype=torch.float32)
                 masks = masks.to(device, dtype=torch.float32)
 
