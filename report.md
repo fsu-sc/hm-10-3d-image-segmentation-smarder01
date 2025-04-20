@@ -2,8 +2,11 @@
 
 ## Personal Details
 **Name:** Sydney Marder
+
 **Date:** 4/20/25
+
 **Course:** ISC 5935
+
 **Instructor:** Olmo S. Zavala-Romero
 
 ## Homework Questions and Answers
@@ -177,8 +180,10 @@ volume_distribution(dataset)
 - Voxel spacing (x, y, z): (1.25, 1.25, 1.3700000047683716)-
 
 **Sample Slices**
+![sample_slices](https://github.com/user-attachments/assets/b9eb65eb-e419-490f-9fc2-7f4e8e3428db)
 
 **Distribution of segmentation volumes**
+![volume_distribution](https://github.com/user-attachments/assets/8f9876ac-3507-4f6b-8b01-da2727848ba4)
 
 ---
 
@@ -277,7 +282,9 @@ class UNet3D(nn.Module):
         return out
 ```
 
-**screenshot of model architecture**
+**Model Architecture**
+
+<img width="229" alt="Screenshot 2025-04-18 at 3 44 06 PM" src="https://github.com/user-attachments/assets/643f5de6-f3fb-49ac-b30e-69d5a3a86879" />
 
 ---
 
@@ -402,7 +409,11 @@ def train_model(epochs=50, batch_size=2, learning_rate=1e-4, log_dir="runs/heart
 
 **Training Dice Loss Curve (TensorBoard)**
 
+<img width="706" alt="Screenshot 2025-04-18 at 3 43 48 PM" src="https://github.com/user-attachments/assets/a4df21e4-1090-4719-8e65-1c1b802f3e13" />
+
 **Validation Dice Loss Curve (TensorBoard)**
+
+<img width="706" alt="Screenshot 2025-04-18 at 3 43 55 PM" src="https://github.com/user-attachments/assets/9676aa5f-dc61-452d-a0c9-9f7974316923" />
 
 ---
 
@@ -413,9 +424,8 @@ For qualitative evaluation, I visualized the model’s segmentation predictions 
 
 The prediction output was passed through a sigmoid activation and thresholded at 0.5 to create a binary mask. Below is the visualization:
 
-📷 *Sample prediction vs. ground truth:*
-
-![Prediction Example](path/to/prediction_sample.png)
+**Sample prediction vs. ground truth:**
+<img width="1129" alt="prediction sample" src="https://github.com/user-attachments/assets/812e4289-6c73-45cb-a9d1-0aef29bd0ccf" />
 
 To quantify segmentation performance, I used Dice similarity score — a metric that measures overlap between the predicted and ground truth masks. Higher Dice values (closer to 1.0) indicate better performance.
 
@@ -475,7 +485,5 @@ def visualize_prediction(index=0):
 
 visualize_prediction(index=0)
 ```
-
-**screenshot of sample prediction**
 
 ---
